@@ -1,0 +1,2 @@
+monarchmoney>=0.1.15
+mcp>=1.2.0

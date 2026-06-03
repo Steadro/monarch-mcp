@@ -1,0 +1,11 @@
+# Secrets & session — NEVER commit. The session token is full account access.
+.mm/
+*.pickle
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
