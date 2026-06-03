@@ -47,13 +47,9 @@ Your Monarch **session token grants full account access**. After you log in once
 
    *Optional:* to avoid typing MFA codes on future re-logins, grab your MFA secret from Monarch (Settings → Security → Enable MFA → "Two-factor text code") and set it as an env var: `MONARCH_MFA_SECRET=...`.
 
-   **Sign in with Google? Use token auth instead.** Google-OAuth accounts have no Monarch password, so `auth_setup.py` can't log in. Run `token_setup.py` instead and paste your auth token:
+   **Sign in with Google/Apple? You must set a Monarch password first.** SSO accounts have no password, and the API login requires one (the web app's session cookie is a different auth system the library can't use). In Monarch, go to **Settings → Security → create a password**; Monarch emails a link to set it. This does *not* disable Google sign-in — it just adds credentials the API needs. Then run `auth_setup.py` above with your email and the new password.
 
-   ```powershell
-   .\.venv\Scripts\python.exe token_setup.py
-   ```
-
-   To find the token: log into Monarch in your browser, open DevTools (F12) → Network tab, click around so it loads data, filter for `graphql`, click any request → Request Headers → copy the value after `Authorization: Token ` . The token grants full account access — it's stored only in the gitignored session file, never printed or committed.
+   *(Advanced: `token_setup.py` exists for anyone who already holds a raw API token from another source — it writes the token straight to the session file. It is not a way around the password requirement for SSO accounts, since no such token is exposed in the browser.)*
 
 3. **Register with Claude Desktop.** Add this to your `claude_desktop_config.json`
    (Settings → Developer → Edit Config), adjusting the paths to match your machine:
