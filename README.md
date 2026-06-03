@@ -47,6 +47,14 @@ Your Monarch **session token grants full account access**. After you log in once
 
    *Optional:* to avoid typing MFA codes on future re-logins, grab your MFA secret from Monarch (Settings → Security → Enable MFA → "Two-factor text code") and set it as an env var: `MONARCH_MFA_SECRET=...`.
 
+   **Sign in with Google? Use token auth instead.** Google-OAuth accounts have no Monarch password, so `auth_setup.py` can't log in. Run `token_setup.py` instead and paste your auth token:
+
+   ```powershell
+   .\.venv\Scripts\python.exe token_setup.py
+   ```
+
+   To find the token: log into Monarch in your browser, open DevTools (F12) → Network tab, click around so it loads data, filter for `graphql`, click any request → Request Headers → copy the value after `Authorization: Token ` . The token grants full account access — it's stored only in the gitignored session file, never printed or committed.
+
 3. **Register with Claude Desktop.** Add this to your `claude_desktop_config.json`
    (Settings → Developer → Edit Config), adjusting the paths to match your machine:
 
