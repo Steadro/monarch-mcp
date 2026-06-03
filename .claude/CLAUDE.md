@@ -5,8 +5,9 @@ no money movement. Built on the unofficial async `monarchmoney` library.
 
 ## Push-on-functional-change workflow
 
-This repo is published at github.com/Steadro/monarch-money-mcp. Keep the public
-repo in sync with working local code.
+This repo is published at github.com/Steadro/monarch-money-mcp (Steadro = the user's
+ecommerce/AI-consulting portfolio brand). Keep the public repo in sync with working
+local code.
 
 After any **functional** change (tools in `server.py`, auth flow, `config.py`,
 `requirements.txt`), before considering the task done:
