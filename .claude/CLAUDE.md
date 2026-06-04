@@ -5,7 +5,7 @@ no money movement. Built on the unofficial async `monarchmoney` library.
 
 ## Push-on-functional-change workflow
 
-This repo is published at github.com/Steadro/monarch-money-mcp (Steadro = the user's
+This repo is published at github.com/Steadro/monarch-mcp (Steadro = the user's
 ecommerce/AI-consulting portfolio brand). Keep the public repo in sync with working
 local code.
 
