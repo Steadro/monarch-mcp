@@ -1,2 +1,5 @@
 monarchmoney>=0.1.15
 mcp>=1.2.0
+# monarchmoney 0.1.15 targets gql 3.x; gql 4.0 changed execute_async() and breaks
+# every GraphQL call. Pin until monarchmoney supports gql 4.
+gql<4

@@ -42,9 +42,18 @@ _DROP = {"host", "content-length", "connection", "accept-encoding"}
 
 
 def _parse_curl(text: str) -> dict:
-    """Pull headers (and -b/--cookie) out of a copied cURL command."""
-    # Join line continuations from both POSIX (\) and Windows (^) copies.
-    text = text.replace("\\\r\n", " ").replace("\\\n", " ").replace("^\r\n", " ").replace("^\n", " ")
+    """Pull headers (and -b/--cookie) out of a copied cURL command.
+
+    Handles all three copy formats DevTools produces:
+      - bash / POSIX  (curl '...'  with \\ line continuations)
+      - Windows cmd   (curl.exe ^"...^"  with ^ line continuations and ^" escaping)
+    """
+    # 1. Join line continuations: cmd uses trailing ^, POSIX uses trailing \.
+    text = text.replace("^\r\n", " ").replace("^\n", " ")
+    text = text.replace("\\\r\n", " ").replace("\\\n", " ")
+    # 2. Undo cmd caret-escaping. These sequences don't occur in POSIX copies,
+    #    so running them unconditionally is a no-op there.
+    text = text.replace('^"', '"').replace("^%", "%").replace("^^", "^")
     tokens = shlex.split(text, posix=True)
 
     headers: dict[str, str] = {}
@@ -78,7 +87,7 @@ async def main() -> None:
     with open(CURL_FILE, encoding="utf-8") as f:
         headers = _parse_curl(f.read())
 
-    if "Cookie" not in {k for k in headers} and "cookie" not in {k.lower(): k for k in headers}:
+    if not any(k.lower() == "cookie" for k in headers):
         raise SystemExit("No Cookie header found in the cURL. Re-copy the request (it must be a logged-in graphql call).")
 
     mm = MonarchMoney()
