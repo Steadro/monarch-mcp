@@ -1,8 +1,10 @@
 # monarch-mcp — project rules
 
 Local MCP server (FastMCP) exposing Monarch (the financial tracking and management tool)
-to Claude. Read + categorize only,
-no money movement. Built on the unofficial async `monarchmoney` library.
+to Claude. Read + categorize only, no money movement. Cookie-only auth: captures the
+browser session via `auth_from_curl.py` → `.mm/mm_auth.json`. Talks to Monarch's private
+GraphQL API through our own `monarch_client.py` (raw aiohttp, hand-written queries — no
+third-party Monarch library). 9/10 tools live; `get_budgets` not yet implemented.
 
 ## Push-on-functional-change workflow
 
@@ -26,6 +28,6 @@ to allow it automatically.
 
 ## Never commit
 
-- The session token (`.mm/`, `*.pickle`), any real `.env`, or `.venv/`. All are
-  gitignored — keep them that way. The token is full account access.
+- The session auth (`.mm/`, `mm_auth.json`, `request.curl`), any real `.env`, or `.venv/`.
+  All are gitignored — keep them that way. The session cookie is full account access.
 - Deps live in `.venv` (not global Python).

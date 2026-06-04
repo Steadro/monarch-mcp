@@ -32,7 +32,7 @@ Built to run entirely on your machine, with **no official API** and **no third-p
 Monarch has **no official public API**. This server talks to Monarch's private GraphQL backend (`api.monarch.com/graphql`) the same way the web app does. Two deliberate design choices, learned the hard way:
 
 - **Our own client, not a library.** The popular community library (`hammem/monarchmoney`) is abandoned (last release 0.1.15) and its queries are stale — Monarch now returns `HTTP 400`. The maintained forks would fix the queries, but installing one means running unaudited third-party code *with full access to your financial account*. We refused that risk. Instead this repo ships [`monarch_client.py`](monarch_client.py): ~150 lines of raw `aiohttp` + hand-written GraphQL queries that request only the fields the tools need. You can read every line.
-- **Browser-cookie auth.** Monarch's web app authenticates with a **session cookie**. The old token-login endpoint is heavily rate-limited (`HTTP 429`) and is **unavailable to Google/Apple SSO accounts** (they have no password). So the primary, universal auth path is to replay your existing browser session — no password, no rate limit, works for everyone.
+- **Browser-cookie auth.** Monarch's web app authenticates with a **session cookie**. The token-login endpoint is heavily rate-limited (`HTTP 429`) and is **unavailable to Google/Apple SSO accounts** (they have no password). So this server authenticates by replaying your existing browser session — no password, no rate-limited login endpoint, works for every account type.
 
 ---
 
@@ -60,11 +60,11 @@ python -m venv .venv
 # ./.venv/bin/python -m pip install -r requirements.txt
 ```
 
-A venv keeps these dependencies out of your global Python. Requires Python 3.10+.
+A venv keeps these dependencies out of your global Python.
 
-### 2. Authenticate (choose ONE)
+### 2. Authenticate (capture your browser session)
 
-**Option A — Browser cookie (recommended; works for everyone, including Google/Apple sign-in).**
+This works for **every** account type — including Google/Apple sign-in — and needs no password:
 
 1. Log into Monarch in your browser.
 2. Open DevTools (`F12`) → **Network** tab, type `graphql` in the filter, and click around the app so a request appears (status `200`).
@@ -74,19 +74,11 @@ A venv keeps these dependencies out of your global Python. Requires Python 3.10+
    ```bash
    # Windows:
    .\.venv\Scripts\python.exe auth_from_curl.py
+   # macOS/Linux:
+   # ./.venv/bin/python auth_from_curl.py
    ```
 
-   It replays your browser's headers, verifies against your account, saves `.mm/mm_auth.json` (gitignored), and deletes the raw cURL. If it prints "found N account(s)," you're set.
-
-**Option B — Email + password (only if you have a Monarch password — i.e. you did *not* sign up with Google/Apple).**
-
-```bash
-.\.venv\Scripts\python.exe auth_setup.py
-```
-
-Prompts for email, password, and an MFA code if 2FA is on. (Optional: set `MONARCH_MFA_SECRET` to skip MFA prompts on re-login.) If you get `HTTP 429`, you've been rate-limited — wait it out, or use Option A.
-
-> SSO users: you *can* instead add a password in Monarch (Settings → Security → create a password) and then use Option B — but Option A is simpler and avoids the rate limit.
+   It replays your browser's headers, verifies against your account, saves `.mm/mm_auth.json` (gitignored, owner-only), and deletes the raw cURL. If it prints "found N account(s)," you're set.
 
 ### 3. Register with your Claude client
 
@@ -125,19 +117,18 @@ Quick local sanity check without Claude:
 
 ## Auth expiry
 
-Browser sessions expire sooner than password sessions. When reads start failing with auth errors, just redo **Option A** (capture a fresh `request.curl`, run `auth_from_curl.py`). The password session (`auth_setup.py`) lasts much longer — over a year — if you prefer Option B.
+Browser sessions don't last forever. When reads start failing with auth errors, just recapture: grab a fresh `graphql` request as cURL into `.mm/request.curl` and re-run `auth_from_curl.py`. Takes ~30 seconds.
 
 ---
 
-## Troubleshooting (things we hit, so you don't have to)
+## Troubleshooting
 
 | Symptom | Cause & fix |
 |---|---|
-| `HTTP 429 Too Many Requests` on `auth_setup.py` | Monarch rate-limits the login endpoint after repeated attempts; resets in hours–days. **Stop retrying** (it resets the clock) and use **Option A** instead. |
-| `401 Unauthorized` after capturing a cookie | Stale/expired session — recapture a fresh `request.curl`. Or you logged out of Monarch (don't). |
-| `Client.execute_async() missing 1 required positional argument` | `gql` 4.0 incompatibility — `requirements.txt` pins `gql<4`; reinstall deps. |
-| Tools return data in a direct test but fail in Claude | The MCP server process is running old code — **restart your Claude client**. |
-| `Something went wrong while processing` (HTTP 400) | The old `monarchmoney` library's stale queries. This repo's `monarch_client.py` avoids them. |
+| `401 Unauthorized` | Stale/expired session — recapture a fresh `request.curl` and re-run `auth_from_curl.py`. Also check you didn't log out of Monarch (that kills the session). |
+| Reads suddenly start failing | Session expired — recapture (see [Auth expiry](#auth-expiry)). |
+| Tools return data in a direct test but fail in Claude | The MCP server process is running old code — **restart your Claude client** (MCP loads at startup). |
+| `No Monarch auth found` | You haven't captured a session yet, or `.mm/mm_auth.json` is missing — run step 2. |
 
 ---
 
@@ -146,12 +137,10 @@ Browser sessions expire sooner than password sessions. When reads start failing 
 | File | Purpose |
 |---|---|
 | `server.py` | The MCP server — defines the 10 tools and trims Monarch's payloads. |
-| `monarch_client.py` | Self-contained Monarch API client (raw aiohttp + hand-written queries). |
-| `auth_from_curl.py` | **Option A** auth — capture browser session from a copied cURL. |
-| `auth_setup.py` | **Option B** auth — email/password login (caches a token). |
-| `token_setup.py` | Advanced: write a raw API token directly to the session file. |
-| `config.py` | File paths (`.mm/mm_auth.json`, `.mm/mm_session.pickle`), env-overridable. |
-| `.env.example` | Documents optional env vars (no secrets). |
+| `monarch_client.py` | Self-contained Monarch API client (raw aiohttp + hand-written queries). No third-party Monarch library. |
+| `auth_from_curl.py` | Auth — capture your browser session from a copied cURL into `.mm/mm_auth.json`. |
+| `config.py` | The `.mm/mm_auth.json` path, env-overridable via `MONARCH_AUTH_FILE`. |
+| `.env.example` | Documents the optional env var (no secrets). |
 
 Secrets live in `.mm/` and are gitignored.
 

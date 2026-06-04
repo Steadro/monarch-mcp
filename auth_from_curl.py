@@ -28,8 +28,6 @@ import json
 import os
 import shlex
 
-from monarchmoney import MonarchMoney
-
 from config import AUTH_FILE
 
 CURL_FILE = os.path.join(os.path.dirname(AUTH_FILE), "request.curl")

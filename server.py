@@ -6,13 +6,12 @@ categories and tags, and it can recategorize / tag / annotate transactions
 and set budget amounts. It deliberately does NOT move money, open/close
 accounts, or delete anything.
 
-Auth (see README): either capture your browser session with `auth_from_curl.py`
-(recommended; works for Google/Apple sign-in), or log in with `auth_setup.py`.
-The server loads whichever is present; it never sees your password.
+Auth (see README): capture your browser session once with `auth_from_curl.py`.
+The server loads it from the gitignored .mm/mm_auth.json; it never sees a password.
 
 Monarch has no official public API. Reads/writes go to its private GraphQL
-backend via `monarch_client.py` (our own hand-written client) when using cookie
-auth, falling back to the `monarchmoney` library for token/password sessions.
+backend via `monarch_client.py` -- our own hand-written client (raw aiohttp, no
+third-party Monarch library trusted with your account).
 """
 import json
 import os
@@ -20,34 +19,27 @@ from datetime import date, timedelta
 from typing import Any, Optional
 
 from mcp.server.fastmcp import FastMCP
-from monarchmoney import MonarchMoney
 
-from config import SESSION_FILE, AUTH_FILE
+from config import AUTH_FILE
+from monarch_client import CookieClient
 
 mcp = FastMCP("monarch-money")
 
-# Single client, lazily logged in from the cached session on first use.
-_mm: Optional[MonarchMoney] = None
+# Single client, built lazily from the captured browser session on first use.
+_mm: Optional[CookieClient] = None
 
 
-def _client() -> MonarchMoney:
+def _client() -> CookieClient:
     global _mm
     if _mm is None:
-        # Preferred for SSO / rate-limited accounts: cookie/header auth captured
-        # from the browser. Avoids the /auth/login/ endpoint entirely.
-        if os.path.exists(AUTH_FILE):
-            with open(AUTH_FILE, encoding="utf-8") as f:
-                saved = json.load(f)
-            from monarch_client import CookieClient
-            _mm = CookieClient(saved.get("headers", {}))
-        elif os.path.exists(SESSION_FILE):
-            _mm = MonarchMoney(session_file=SESSION_FILE)
-            _mm.load_session(SESSION_FILE)
-        else:
+        if not os.path.exists(AUTH_FILE):
             raise RuntimeError(
-                f"No Monarch auth found. Either capture browser auth into {AUTH_FILE} "
-                "(run `python auth_from_curl.py`), or run `python auth_setup.py` to log in."
+                f"No Monarch auth found at {AUTH_FILE}. Capture your browser session "
+                "(see the README), then run `python auth_from_curl.py`."
             )
+        with open(AUTH_FILE, encoding="utf-8") as f:
+            saved = json.load(f)
+        _mm = CookieClient(saved.get("headers", {}))
     return _mm
 
 
