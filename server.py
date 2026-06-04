@@ -20,7 +20,7 @@ from typing import Any, Optional
 from mcp.server.fastmcp import FastMCP
 from monarchmoney import MonarchMoney
 
-from config import SESSION_FILE
+from config import SESSION_FILE, AUTH_FILE
 
 mcp = FastMCP("monarch-money")
 
@@ -31,13 +31,21 @@ _mm: Optional[MonarchMoney] = None
 def _client() -> MonarchMoney:
     global _mm
     if _mm is None:
-        if not os.path.exists(SESSION_FILE):
+        # Preferred for SSO / rate-limited accounts: cookie/header auth captured
+        # from the browser. Avoids the /auth/login/ endpoint entirely.
+        if os.path.exists(AUTH_FILE):
+            with open(AUTH_FILE, encoding="utf-8") as f:
+                saved = json.load(f)
+            _mm = MonarchMoney()
+            _mm._headers.update(saved.get("headers", {}))
+        elif os.path.exists(SESSION_FILE):
+            _mm = MonarchMoney(session_file=SESSION_FILE)
+            _mm.load_session(SESSION_FILE)
+        else:
             raise RuntimeError(
-                f"No Monarch session found at {SESSION_FILE}. "
-                "Run `python auth_setup.py` once to log in, then restart."
+                f"No Monarch auth found. Either capture browser auth into {AUTH_FILE} "
+                "(run `python auth_from_curl.py`), or run `python auth_setup.py` to log in."
             )
-        _mm = MonarchMoney(session_file=SESSION_FILE)
-        _mm.load_session(SESSION_FILE)
     return _mm
 
 

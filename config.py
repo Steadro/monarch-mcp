@@ -13,3 +13,11 @@ SESSION_FILE = os.environ.get(
     "MONARCH_SESSION_FILE",
     os.path.join(BASE_DIR, ".mm", "mm_session.pickle"),
 )
+
+# Cookie/header auth (for SSO accounts or when the login endpoint is rate-limited).
+# Holds a captured set of browser request headers (incl. the session cookie) so the
+# server can talk to Monarch's GraphQL API without ever calling /auth/login/.
+AUTH_FILE = os.environ.get(
+    "MONARCH_AUTH_FILE",
+    os.path.join(BASE_DIR, ".mm", "mm_auth.json"),
+)
