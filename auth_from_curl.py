@@ -90,8 +90,9 @@ async def main() -> None:
     if not any(k.lower() == "cookie" for k in headers):
         raise SystemExit("No Cookie header found in the cURL. Re-copy the request (it must be a logged-in graphql call).")
 
-    mm = MonarchMoney()
-    mm._headers.update(headers)
+    from monarch_client import CookieClient
+
+    mm = CookieClient(headers)
 
     # Test: does this auth actually work?
     accounts = await mm.get_accounts()

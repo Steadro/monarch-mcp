@@ -47,9 +47,19 @@ Your Monarch **session token grants full account access**. After you log in once
 
    *Optional:* to avoid typing MFA codes on future re-logins, grab your MFA secret from Monarch (Settings → Security → Enable MFA → "Two-factor text code") and set it as an env var: `MONARCH_MFA_SECRET=...`.
 
-   **Sign in with Google/Apple? You must set a Monarch password first.** SSO accounts have no password, and the API login requires one (the web app's session cookie is a different auth system the library can't use). In Monarch, go to **Settings → Security → create a password**; Monarch emails a link to set it. This does *not* disable Google sign-in — it just adds credentials the API needs. Then run `auth_setup.py` above with your email and the new password.
+   **Sign in with Google/Apple, or hitting `HTTP 429 Too Many Requests`? Use browser-cookie auth instead** (recommended for SSO accounts — no password needed, and it never touches the rate-limited login endpoint):
 
-   *(Advanced: `token_setup.py` exists for anyone who already holds a raw API token from another source — it writes the token straight to the session file. It is not a way around the password requirement for SSO accounts, since no such token is exposed in the browser.)*
+   1. Log into Monarch in your browser. Open DevTools (F12) → **Network**, filter `graphql`, click around so a request appears.
+   2. Right-click a `graphql` request → **Copy as cURL** (bash or cmd — both work).
+   3. Paste it into `.mm/request.curl`, then run:
+
+      ```powershell
+      .\.venv\Scripts\python.exe auth_from_curl.py
+      ```
+
+   It replays your browser's headers, verifies against your account, saves `.mm/mm_auth.json` (gitignored), and deletes the raw cURL. Browser sessions expire sooner than the password login, so recapture if reads start failing.
+
+   *(Why: SSO accounts have no password, and Monarch's web app authenticates with a session cookie — a different system than the `/auth/login/` token. This path uses that cookie directly. The server prefers `mm_auth.json` when present, else falls back to the `auth_setup.py` token session.)*
 
 3. **Register with Claude Desktop.** Add this to your `claude_desktop_config.json`
    (Settings → Developer → Edit Config), adjusting the paths to match your machine:
@@ -71,6 +81,7 @@ Your Monarch **session token grants full account access**. After you log in once
 
 ## Notes
 
-- The session can expire; if tools start failing with auth errors, re-run `python auth_setup.py`.
-- The session file path can be relocated via the `MONARCH_SESSION_FILE` env var (see `config.py`).
+- **Auth expiry:** if tools start failing with auth errors, recapture (`auth_from_curl.py`) or re-login (`auth_setup.py`).
+- **Custom client:** the upstream `monarchmoney` library (0.1.15) is abandoned and its queries are stale (Monarch returns HTTP 400). To avoid trusting an unaudited third-party fork with full account access, this repo ships its own minimal client (`monarch_client.py`) — raw `aiohttp` + hand-written queries requesting only the fields the tools use. `gql` is pinned `<4` (4.0 broke the transport).
+- **Known gap:** `get_budgets` is not yet reimplemented on the custom client (its query is large); the other 9 tools are live. Reads + categorize work fully.
 - All formatters trim Monarch's large GraphQL payloads to the useful fields so responses stay fast and cheap.

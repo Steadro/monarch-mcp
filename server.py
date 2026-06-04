@@ -36,8 +36,8 @@ def _client() -> MonarchMoney:
         if os.path.exists(AUTH_FILE):
             with open(AUTH_FILE, encoding="utf-8") as f:
                 saved = json.load(f)
-            _mm = MonarchMoney()
-            _mm._headers.update(saved.get("headers", {}))
+            from monarch_client import CookieClient
+            _mm = CookieClient(saved.get("headers", {}))
         elif os.path.exists(SESSION_FILE):
             _mm = MonarchMoney(session_file=SESSION_FILE)
             _mm.load_session(SESSION_FILE)
