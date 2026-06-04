@@ -1,5 +1,11 @@
 # Monarch MCP
 
+[![License](https://img.shields.io/github/license/Steadro/monarch-mcp)](LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/Steadro/monarch-mcp)](https://github.com/Steadro/monarch-mcp/commits/main)
+
+![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
+![MCP](https://img.shields.io/badge/MCP-Model_Context_Protocol-1f6feb)
+
 A local [Model Context Protocol](https://modelcontextprotocol.io) server that gives Claude **read + categorize** access to your [Monarch](https://www.monarch.com) finances — Monarch is the personal financial tracking and management tool — so Claude can see accounts, transactions, budgets and cashflow, and recategorize / tag / annotate transactions. **It never moves money** (no transfers, no account open/close, no deletes).
 
 Built to run entirely on your machine, with **no official API** and **no third-party package trusted with your account** (see [How it works](#how-it-works)).
