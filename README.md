@@ -21,9 +21,9 @@ Built to run entirely on your machine, with **no official API** and **no third-p
 | `update_transaction` | Set category, add notes, hide from reports, clear needs-review |
 | `set_transaction_tags` | Overwrite a transaction's tags |
 | `set_budget_amount` | Set a monthly budget for a category / group |
-| `get_budgets` | ⚠️ Not yet implemented (see [Known limitations](#known-limitations)) |
+| `get_budgets` | Planned vs. actual vs. remaining, by category |
 
-9 of 10 tools are live. Reads + categorize work fully.
+All 10 tools are live. Reads + categorize work fully.
 
 ---
 
@@ -148,7 +148,6 @@ Secrets live in `.mm/` and are gitignored.
 
 ## Known limitations
 
-- **`get_budgets` is not implemented** on the custom client yet — Monarch's budget query is large and nested. The other 9 tools work. PRs welcome.
 - This is an **unofficial** integration. Monarch can change their private API at any time and break it; that's the trade-off. When a query breaks, it's usually a field rename — fixable in `monarch_client.py`.
 
 ## Disclaimer — use at your own risk

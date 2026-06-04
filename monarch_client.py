@@ -13,7 +13,7 @@ them resilient to unrelated schema churn. Returns the same dict shapes the old
 library did, so server.py's formatters are unchanged.
 """
 import json
-from datetime import date
+from datetime import date, timedelta
 from typing import Any, Dict, List, Optional
 
 import aiohttp
@@ -80,6 +80,17 @@ query Web_GetCashFlowPage($filters: TransactionFilterInput) {
   byCategoryGroup: aggregates(filters: $filters, groupBy: ["categoryGroup"]) {
     groupBy { categoryGroup { id name } }
     summary { sumIncome sumExpense }
+  }
+}
+"""
+
+Q_BUDGETS = """
+query GetJointPlanningData($startDate: Date!, $endDate: Date!) {
+  budgetData(startMonth: $startDate, endMonth: $endDate) {
+    monthlyAmountsByCategory {
+      category { id name }
+      monthlyAmounts { month plannedCashFlowAmount actualAmount remainingAmount }
+    }
   }
 }
 """
@@ -193,15 +204,35 @@ class CookieClient:
             filters["endDate"] = end_date
         return await self._call("Web_GetCashFlowPage", Q_CASHFLOW, {"filters": filters})
 
-    async def get_budgets(self, *_: Any, **__: Any) -> Dict[str, Any]:
-        # The budgets query (GetJointPlanningData) is large and not yet reimplemented
-        # for the hand-written client. Reads + categorize work; this analytics view
-        # is the one remaining follow-up.
-        raise RuntimeError(
-            "get_budgets is not yet available via browser-cookie auth in this build. "
-            "Accounts, transactions, categories, tags, cashflow, spending summary, and "
-            "all categorize/tag/budget-set actions are available."
+    async def get_budgets(
+        self, start_date: Optional[str] = None, end_date: Optional[str] = None, **_: Any
+    ) -> Dict[str, Any]:
+        # Monarch's budgetData takes first-of-month dates. Default to the current month.
+        first = date.today().replace(day=1)
+        start_date = start_date or first.isoformat()
+        end_date = end_date or (first + timedelta(days=32)).replace(day=1).isoformat()
+        data = await self._call(
+            "GetJointPlanningData", Q_BUDGETS,
+            {"startDate": start_date, "endDate": end_date},
         )
+        bd = data.get("budgetData") or {}
+        out = []
+        for row in bd.get("monthlyAmountsByCategory", []):
+            cat = row.get("category") or {}
+            out.append({
+                "category_id": cat.get("id"),
+                "category": cat.get("name"),
+                "months": [
+                    {
+                        "month": m.get("month"),
+                        "planned": m.get("plannedCashFlowAmount"),
+                        "actual": m.get("actualAmount"),
+                        "remaining": m.get("remainingAmount"),
+                    }
+                    for m in (row.get("monthlyAmounts") or [])
+                ],
+            })
+        return {"start_date": start_date, "end_date": end_date, "budgets_by_category": out}
 
     # --- Writes (categorize only; no money movement) ------------------------
     async def update_transaction(

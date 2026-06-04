@@ -4,7 +4,7 @@ Local MCP server (FastMCP) exposing Monarch (the financial tracking and manageme
 to Claude. Read + categorize only, no money movement. Cookie-only auth: captures the
 browser session via `auth_from_curl.py` → `.mm/mm_auth.json`. Talks to Monarch's private
 GraphQL API through our own `monarch_client.py` (raw aiohttp, hand-written queries — no
-third-party Monarch library). 9/10 tools live; `get_budgets` not yet implemented.
+third-party Monarch library). All 10 tools live.
 
 ## Push-on-functional-change workflow
 
