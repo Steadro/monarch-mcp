@@ -1,6 +1,6 @@
 # Monarch MCP
 
-A local [Model Context Protocol](https://modelcontextprotocol.io) server that gives Claude **read + categorize** access to your [Monarch Money](https://www.monarch.com) finances — see accounts, transactions, budgets and cashflow, and recategorize / tag / annotate transactions. **It never moves money** (no transfers, no account open/close, no deletes).
+A local [Model Context Protocol](https://modelcontextprotocol.io) server that gives Claude **read + categorize** access to your [Monarch](https://www.monarch.com) finances — Monarch is the personal financial tracking and management tool — so Claude can see accounts, transactions, budgets and cashflow, and recategorize / tag / annotate transactions. **It never moves money** (no transfers, no account open/close, no deletes).
 
 Built to run entirely on your machine, with **no official API** and **no third-party package trusted with your account** (see [How it works](#how-it-works)).
 

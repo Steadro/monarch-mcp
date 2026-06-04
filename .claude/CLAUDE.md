@@ -1,6 +1,7 @@
 # monarch-mcp — project rules
 
-Local MCP server (FastMCP) exposing Monarch Money to Claude. Read + categorize only,
+Local MCP server (FastMCP) exposing Monarch (the financial tracking and management tool)
+to Claude. Read + categorize only,
 no money movement. Built on the unofficial async `monarchmoney` library.
 
 ## Push-on-functional-change workflow

@@ -1,4 +1,4 @@
-"""Monarch Money MCP server.
+"""Monarch MCP server.
 
 Exposes your Monarch financial data to Claude as MCP tools. Scope is
 READ + CATEGORIZE: it can view accounts, transactions, budgets, cashflow,
