@@ -23,7 +23,7 @@ from mcp.server.fastmcp import FastMCP
 from config import AUTH_FILE
 from monarch_client import CookieClient
 
-mcp = FastMCP("monarch-money")
+mcp = FastMCP("monarch")
 
 # Single client, built lazily from the captured browser session on first use.
 _mm: Optional[CookieClient] = None

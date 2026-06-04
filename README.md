@@ -85,7 +85,7 @@ This works for **every** account type — including Google/Apple sign-in — and
 **Claude Code / cowork** (run in the repo directory):
 
 ```bash
-claude mcp add monarch-money -- /absolute/path/to/.venv/Scripts/python.exe /absolute/path/to/server.py
+claude mcp add monarch -- /absolute/path/to/.venv/Scripts/python.exe /absolute/path/to/server.py
 ```
 
 **Claude Desktop** — Settings → Developer → Edit Config, add to `claude_desktop_config.json`:
@@ -93,7 +93,7 @@ claude mcp add monarch-money -- /absolute/path/to/.venv/Scripts/python.exe /abso
 ```json
 {
   "mcpServers": {
-    "monarch-money": {
+    "monarch": {
       "command": "/absolute/path/to/monarch-mcp/.venv/Scripts/python.exe",
       "args": ["/absolute/path/to/monarch-mcp/server.py"]
     }
