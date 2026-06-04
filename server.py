@@ -6,11 +6,13 @@ categories and tags, and it can recategorize / tag / annotate transactions
 and set budget amounts. It deliberately does NOT move money, open/close
 accounts, or delete anything.
 
-Auth: run `python auth_setup.py` once to cache a session token. This server
-loads that token at startup; it never sees your password.
+Auth (see README): either capture your browser session with `auth_from_curl.py`
+(recommended; works for Google/Apple sign-in), or log in with `auth_setup.py`.
+The server loads whichever is present; it never sees your password.
 
-Built on the community `monarchmoney` library, which talks to Monarch's
-private GraphQL API (there is no official public API).
+Monarch has no official public API. Reads/writes go to its private GraphQL
+backend via `monarch_client.py` (our own hand-written client) when using cookie
+auth, falling back to the `monarchmoney` library for token/password sessions.
 """
 import json
 import os
