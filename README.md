@@ -1,7 +1,6 @@
 # Monarch MCP
 
-[![License](https://img.shields.io/github/license/Steadro/monarch-mcp)](LICENSE)
-[![Last commit](https://img.shields.io/github/last-commit/Steadro/monarch-mcp)](https://github.com/Steadro/monarch-mcp/commits/main)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
 ![MCP](https://img.shields.io/badge/MCP-Model_Context_Protocol-1f6feb)
