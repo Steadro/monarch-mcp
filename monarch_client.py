@@ -151,7 +151,10 @@ class CookieClient:
                 text = await resp.text()
                 if resp.status != 200:
                     raise RuntimeError(f"Monarch HTTP {resp.status}: {text[:300]}")
-                payload = json.loads(text)
+                try:
+                    payload = json.loads(text)
+                except json.JSONDecodeError as e:
+                    raise RuntimeError(f"Monarch returned non-JSON response: {text[:300]}") from e
                 if payload.get("errors"):
                     raise RuntimeError(f"Monarch GraphQL error: {payload['errors']}")
                 return payload.get("data", {})
@@ -237,26 +240,19 @@ class CookieClient:
     # --- Writes (categorize only; no money movement) ------------------------
     async def update_transaction(
         self, transaction_id: str, category_id: Optional[str] = None,
-        merchant_name: Optional[str] = None, goal_id: Optional[str] = None,
-        amount: Optional[float] = None, date: Optional[str] = None,
         hide_from_reports: Optional[bool] = None, needs_review: Optional[bool] = None,
         notes: Optional[str] = None, **_: Any,
     ) -> Dict[str, Any]:
+        # Categorize-only BY DESIGN: amount / date / merchant are intentionally not
+        # accepted, so no code path through this client can alter a transaction's value.
+        # Do not add them back without a deliberate scope review.
         inp: Dict[str, Any] = {"id": transaction_id}
         if category_id is not None:
             inp["category"] = category_id
-        if merchant_name is not None:
-            inp["name"] = merchant_name
-        if amount:
-            inp["amount"] = amount
-        if date:
-            inp["date"] = date
         if hide_from_reports is not None:
             inp["hideFromReports"] = bool(hide_from_reports)
         if needs_review is not None:
             inp["needsReview"] = bool(needs_review)
-        if goal_id is not None:
-            inp["goalId"] = goal_id
         if notes is not None:
             inp["notes"] = notes
         return await self._call("Web_TransactionDrawerUpdateTransaction", M_UPDATE_TXN, {"input": inp})

@@ -107,7 +107,7 @@ Use absolute paths. On Windows, escape backslashes in JSON (`C:\\path\\to\\...`)
 
 **Restart your Claude client** (MCP servers load their code at startup — after any code change you must restart for it to take effect). Then ask: *"What's my net worth, and what did I spend on dining last month?"*
 
-Quick local sanity check without Claude:
+Quick local sanity check without Claude (run *after* step 2 — it needs `.mm/mm_auth.json`):
 
 ```bash
 .\.venv\Scripts\python.exe -c "import asyncio, json, server; print(json.loads(asyncio.run(server.list_accounts()))['count'], 'accounts')"

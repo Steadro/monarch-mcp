@@ -1,5 +1,7 @@
-# Secrets & session — NEVER commit. The session token is full account access.
+# Secrets & session — NEVER commit. The session cookie is full account access.
 .mm/
+mm_auth.json
+*.curl
 *.pickle
 .env
 

@@ -73,7 +73,7 @@ def _fmt_txn(t: dict) -> dict:
         "category": (t.get("category") or {}).get("name"),
         "category_id": (t.get("category") or {}).get("id"),
         "account": (t.get("account") or {}).get("displayName"),
-        "tags": [tag.get("name") for tag in (t.get("tags") or [])],
+        "tags": [tag.get("name") for tag in (t.get("tags") or []) if tag],
         "notes": t.get("notes"),
         "pending": t.get("pending"),
         "needs_review": t.get("needsReview"),
@@ -117,6 +117,8 @@ async def get_transactions(
 ) -> str:
     """Get transactions, newest first. Dates are 'YYYY-MM-DD'. Optionally filter by
     free-text search, category IDs, account IDs, or tag IDs. Defaults to the last 50."""
+    limit = min(max(limit, 1), 500)  # guard against runaway full-history pulls
+    offset = max(offset, 0)
     data = await _client().get_transactions(
         limit=limit,
         offset=offset,
@@ -193,9 +195,8 @@ async def update_transaction(
     """Update a transaction: set its category (use list_categories for IDs), add notes,
     hide it from reports, or clear its needs-review flag. Only the fields you pass change.
 
-    NOTE: This tool intentionally does NOT expose a transaction's amount or date. The
-    underlying client can change them, but they are deliberately withheld here to keep the
-    tool categorize-only. Do not add amount/date parameters without a deliberate review."""
+    NOTE: Categorize-only by design. Neither this tool nor the underlying client can change
+    a transaction's amount or date — those are intentionally not implemented."""
     result = await _client().update_transaction(
         transaction_id=transaction_id,
         category_id=category_id,
@@ -208,8 +209,11 @@ async def update_transaction(
 
 @mcp.tool()
 async def set_transaction_tags(transaction_id: str, tag_ids: list[str]) -> str:
-    """Set the tags on a transaction (use list_tags for IDs). This OVERWRITES existing
-    tags; pass an empty list to remove all tags."""
+    """Set the tags on a transaction (use list_tags for IDs).
+
+    WARNING: this OVERWRITES all existing tags. To add or remove a single tag, first read the
+    transaction's current tags, modify the list, then pass the full new list. Pass an empty
+    list to clear all tags."""
     return _dumps(await _client().set_transaction_tags(transaction_id, tag_ids))
 
 

@@ -92,8 +92,16 @@ async def main() -> None:
 
     mm = CookieClient(headers)
 
-    # Test: does this auth actually work?
-    accounts = await mm.get_accounts()
+    # Test: does this auth actually work? (Don't save a session that doesn't verify.)
+    try:
+        accounts = await mm.get_accounts()
+    except Exception as e:
+        raise SystemExit(
+            f"\nCould not authenticate with the captured request: {e}\n"
+            "The session is likely expired or the cURL was incomplete. Log into Monarch "
+            "in your browser, re-copy a fresh `graphql` request as cURL into "
+            f"{CURL_FILE}, and run this again."
+        ) from e
     n = len(accounts.get("accounts", []))
 
     os.makedirs(os.path.dirname(AUTH_FILE), exist_ok=True)
