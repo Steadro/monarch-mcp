@@ -160,6 +160,17 @@ Secrets live in `.mm/` and are gitignored.
 - **`get_budgets` is not implemented** on the custom client yet — Monarch's budget query is large and nested. The other 9 tools work. PRs welcome.
 - This is an **unofficial** integration. Monarch can change their private API at any time and break it; that's the trade-off. When a query breaks, it's usually a field rename — fixable in `monarch_client.py`.
 
+## Disclaimer — use at your own risk
+
+This is an independent, **unofficial** project. It is **not affiliated with, endorsed by, or supported by Monarch** in any way.
+
+- It works by talking to Monarch's **private, undocumented API** using your own session. Monarch can change or block this at any time, and doing so may **break the tool without warning**.
+- Using it may be against **Monarch's Terms of Service**. You are responsible for reviewing those terms and deciding whether to proceed.
+- Your session grants **full access to your financial account**. You alone are responsible for safeguarding your credentials and the `.mm/` files, and for anything the tools do (including the categorize/budget *writes*).
+- This software is provided **"AS IS", without warranty of any kind**, express or implied. The authors are **not liable** for any damages, data loss, account issues, or financial consequences arising from its use.
+
+**By using this, you accept these risks.** If that's not acceptable, don't use it. When in doubt, use read-only and review every write before approving it.
+
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE). (The MIT license's "AS IS / no warranty" terms apply in addition to the disclaimer above.)
