@@ -48,6 +48,8 @@ Monarch has **no official public API**. This server talks to Monarch's private G
 
 ### 1. Clone and install
 
+**Python 3.10+ required** — check with `python --version`.
+
 ```bash
 git clone https://github.com/Steadro/monarch-mcp.git
 cd monarch-mcp
@@ -67,7 +69,7 @@ A venv keeps these dependencies out of your global Python. Requires Python 3.10+
 1. Log into Monarch in your browser.
 2. Open DevTools (`F12`) → **Network** tab, type `graphql` in the filter, and click around the app so a request appears (status `200`).
 3. Right-click any `graphql` request → **Copy** → **Copy as cURL** (bash *or* cmd — both are handled).
-4. Paste it into a new file `.mm/request.curl`, then run:
+4. Create the `.mm/` folder if it doesn't exist (`mkdir .mm`), paste the cURL into a new file `.mm/request.curl`, then run:
 
    ```bash
    # Windows:

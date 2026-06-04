@@ -101,6 +101,12 @@ async def main() -> None:
     os.makedirs(os.path.dirname(AUTH_FILE), exist_ok=True)
     with open(AUTH_FILE, "w", encoding="utf-8") as f:
         json.dump({"headers": headers}, f, indent=2)
+    # Restrict to owner-only (meaningful on macOS/Linux; harmless on Windows).
+    # This file holds your session cookie -- treat it like a password.
+    try:
+        os.chmod(AUTH_FILE, 0o600)
+    except OSError:
+        pass
 
     # Remove the raw cURL (full of secrets) now that we've extracted what we need.
     try:

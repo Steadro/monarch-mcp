@@ -199,7 +199,11 @@ async def update_transaction(
     needs_review: Optional[bool] = None,
 ) -> str:
     """Update a transaction: set its category (use list_categories for IDs), add notes,
-    hide it from reports, or clear its needs-review flag. Only the fields you pass change."""
+    hide it from reports, or clear its needs-review flag. Only the fields you pass change.
+
+    NOTE: This tool intentionally does NOT expose a transaction's amount or date. The
+    underlying client can change them, but they are deliberately withheld here to keep the
+    tool categorize-only. Do not add amount/date parameters without a deliberate review."""
     result = await _client().update_transaction(
         transaction_id=transaction_id,
         category_id=category_id,
